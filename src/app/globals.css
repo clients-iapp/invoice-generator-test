@@ -1,0 +1,148 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens. The palette borrows from bookkeeping: navy ledger ink,
+ * green-eyeshade green for actions, a sage desk surface, and white paper.
+ * Contrast: muted on paper 5.8:1, muted on desk 4.8:1, ledger on paper 7.1:1.
+ */
+@theme {
+  --color-ink: #1d2b36;
+  --color-muted: #5b6770;
+  --color-desk: #e7ebe6;
+  --color-desk-deep: #dce2dc;
+  --color-paper: #ffffff;
+  --color-rule: #d6dcd8;
+  --color-field: #8a969e; /* input borders, 3:1 against paper */
+  --color-ledger: #2b6248;
+  --color-ledger-dark: #1f4a36;
+  --color-ledger-tint: #e3eee7;
+  --color-danger: #b3261e;
+  --color-danger-tint: #fbeceb;
+}
+
+@theme inline {
+  --font-sans: var(--font-public-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-source-serif), ui-serif, Georgia, serif;
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+
+  body {
+    background: var(--color-desk);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* One focus style everywhere: a ledger-green ring with a paper-colored gap. */
+  :focus-visible {
+    outline: 2px solid var(--color-ledger);
+    outline-offset: 2px;
+  }
+
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  /* On phones the sticky header and bottom action bar must not hide the focused field. */
+  @media (width < 64rem) {
+    html {
+      scroll-padding-block: 7.5rem 5.5rem;
+    }
+  }
+
+  dialog::backdrop {
+    background: rgb(29 43 54 / 0.45);
+    backdrop-filter: blur(2px);
+  }
+
+  dialog[open] {
+    animation: dialog-in 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  dialog[open]::backdrop {
+    animation: backdrop-in 180ms ease-out;
+  }
+
+  @keyframes dialog-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.98);
+    }
+  }
+
+  @keyframes backdrop-in {
+    from {
+      opacity: 0;
+    }
+  }
+}
+
+@utility field-input {
+  @apply w-full rounded-md border border-field bg-paper px-3 py-2 text-[15px] text-ink placeholder:text-muted;
+  @apply transition-colors hover:border-ink focus-visible:border-ledger focus-visible:outline-offset-0;
+
+  &[aria-invalid="true"] {
+    @apply border-danger bg-danger-tint/40;
+  }
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-md px-3.5 py-2 text-sm font-semibold whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-60;
+}
+
+@utility btn-primary {
+  @apply btn bg-ledger text-paper hover:bg-ledger-dark;
+}
+
+@utility btn-secondary {
+  @apply btn border border-field bg-paper text-ink hover:border-ink;
+}
+
+@utility btn-quiet {
+  @apply btn px-2 text-muted hover:bg-desk hover:text-ink;
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* Print only the invoice sheet: no app chrome, no shadow, real page margins. */
+@page {
+  size: letter;
+  margin: 0.55in;
+}
+
+@media print {
+  body {
+    background: white;
+  }
+
+  .invoice-sheet {
+    box-shadow: none !important;
+    border: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .invoice-sheet tr,
+  .invoice-totals {
+    break-inside: avoid;
+  }
+}
